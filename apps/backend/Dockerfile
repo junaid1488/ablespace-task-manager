@@ -2,7 +2,7 @@ FROM node:20-slim
 
 WORKDIR /app
 
-# Install OpenSSL and dumb-init for Prisma and process signal handling
+# Install OpenSSL and dumb-init
 RUN apt-get update \
     && apt-get install -y --no-install-recommends openssl dumb-init \
     && rm -rf /var/lib/apt/lists/*
@@ -11,7 +11,7 @@ RUN apt-get update \
 COPY package*.json ./
 COPY prisma ./prisma
 
-# Install dependencies required for building
+# Install dependencies required for the build
 RUN npm ci
 
 # Generate Prisma Client
@@ -20,8 +20,8 @@ RUN npx prisma generate
 # Copy application source
 COPY . .
 
-# Build NestJS application
-RUN npm run build
+# Build NestJS application and verify the entry file exists
+RUN npm run build && test -f dist/main.js
 
 # Remove development dependencies after build
 RUN npm prune --omit=dev \
@@ -36,14 +36,15 @@ RUN chown -R nestjs:nodejs /app
 
 USER nestjs
 
-# Render uses PORT=10000
+# Render port
 EXPOSE 10000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD node -e "require('http').get('http://127.0.0.1:10000/api/v1/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"
 
-# Start application
+# Use dumb-init
 ENTRYPOINT ["dumb-init", "--"]
 
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:prod"]
+# Run migrations and start the application
+CMD ["sh", "-c", "npx prisma migrate deploy && node /app/dist/main.js"]
