@@ -21,7 +21,7 @@ RUN apk add --no-cache dumb-init
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/public ./public
+
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs
