@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 33% 97%;
+    --foreground: 222 30% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 30% 14%;
+    --border: 220 18% 90%;
+    --muted: 220 25% 95%;
+    --muted-foreground: 220 10% 46%;
+    --primary: 217 91% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 217 91% 95%;
+    --secondary: 220 25% 95%;
+    --secondary-foreground: 222 30% 14%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 60% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --radius: 0.625rem;
+
+    /* Fixed sidebar palette — the sidebar stays dark navy regardless of light/dark mode,
+       matching the reference product's persistent dark nav rail. */
+    --sidebar-bg: 222 28% 9%;
+    --sidebar-bg-hover: 222 22% 15%;
+    --sidebar-fg: 220 20% 92%;
+    --sidebar-muted: 220 10% 55%;
+    --sidebar-border: 222 20% 16%;
+  }
+
+  .dark {
+    --background: 222 26% 8%;
+    --foreground: 210 20% 96%;
+    --card: 222 22% 11%;
+    --card-foreground: 210 20% 96%;
+    --border: 222 16% 20%;
+    --muted: 222 16% 16%;
+    --muted-foreground: 220 10% 65%;
+    --primary: 217 91% 63%;
+    --primary-foreground: 222 26% 8%;
+    --primary-soft: 217 60% 18%;
+    --secondary: 222 16% 16%;
+    --secondary-foreground: 210 20% 96%;
+    --destructive: 0 63% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 55% 48%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 92% 55%;
+    --warning-foreground: 222 26% 8%;
+
+    --sidebar-bg: 222 30% 6%;
+    --sidebar-bg-hover: 222 22% 13%;
+    --sidebar-fg: 220 20% 92%;
+    --sidebar-muted: 220 10% 55%;
+    --sidebar-border: 222 20% 14%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+}
