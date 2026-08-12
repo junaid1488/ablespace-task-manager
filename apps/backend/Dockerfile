@@ -21,7 +21,7 @@ RUN npx prisma generate
 COPY . .
 
 # Build NestJS application and verify the entry file exists
-RUN npm run build && test -f dist/main.js
+RUN npm run build && find dist -type f -name "main.js" -print
 
 # Remove development dependencies after build
 RUN npm prune --omit=dev \
@@ -47,4 +47,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
 ENTRYPOINT ["dumb-init", "--"]
 
 # Run migrations and start the application
-CMD ["sh", "-c", "npx prisma migrate deploy && node /app/dist/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node $(find /app/dist -type f -name 'main.js' | head -1)"]
