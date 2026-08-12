@@ -2,35 +2,46 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dumb-init to handle signals properly
+# Install dumb-init
 RUN apk add --no-cache dumb-init
 
-# Copy package files
+# Copy package files and Prisma schema
 COPY package*.json ./
 COPY prisma ./prisma
 
-# Install production dependencies only
-RUN npm ci --only=production && npm cache clean --force
+# Install all dependencies required for the build
+RUN npm ci
 
-# Generate Prisma client
+# Generate Prisma Client
 RUN npx prisma generate
 
-# Build the application
+# Copy application source
 COPY . .
+
+# Build NestJS application
 RUN npm run build
 
+# Remove development dependencies after the build
+RUN npm prune --omit=dev && npm cache clean --force
+
 # Create non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nestjs -u 1001
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001
+
+# Give the application user ownership of the application directory
+RUN chown -R nestjs:nodejs /app
+
 USER nestjs
 
-# Expose port
+# Backend port
 EXPOSE 4000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:4000/api/v1/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+# Container health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:4000/api/v1/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"
 
-# Use dumb-init to run the app
+# Use dumb-init to handle signals correctly
 ENTRYPOINT ["dumb-init", "--"]
+
+# Start production application
 CMD ["npm", "run", "start:prod"]
