@@ -8,6 +8,7 @@ interface AuthState {
   accessToken: string | null;
   user: User | null;
   isHydrated: boolean;
+
   setAuth: (accessToken: string, user: User) => void;
   updateUser: (user: Partial<User>) => void;
   logout: () => void;
@@ -20,15 +21,41 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       user: null,
       isHydrated: false,
-      setAuth: (accessToken, user) => set({ accessToken, user }),
+
+      // Set authentication and mark the store as ready.
+      setAuth: (accessToken, user) =>
+        set({
+          accessToken,
+          user,
+          isHydrated: true,
+        }),
+
       updateUser: (partial) =>
-        set((state) => ({ user: state.user ? { ...state.user, ...partial } : state.user })),
-      logout: () => set({ accessToken: null, user: null }),
-      setHydrated: () => set({ isHydrated: true }),
+        set((state) => ({
+          user: state.user
+            ? { ...state.user, ...partial }
+            : state.user,
+        })),
+
+      // Clear authentication but keep the store hydrated.
+      logout: () =>
+        set({
+          accessToken: null,
+          user: null,
+          isHydrated: true,
+        }),
+
+      setHydrated: () =>
+        set({
+          isHydrated: true,
+        }),
     }),
     {
       name: 'ablespace-auth',
-      onRehydrateStorage: () => (state) => state?.setHydrated(),
+
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated();
+      },
     },
   ),
 );
