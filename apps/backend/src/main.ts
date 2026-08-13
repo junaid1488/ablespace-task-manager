@@ -49,16 +49,29 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // CORS
-  const corsOrigin =
-    process.env.CORS_ORIGIN || 'http://localhost:3000';
+  // Supports both local development and the deployed Render frontend.
+  const corsOrigins = (
+    process.env.CORS_ORIGIN ||
+    'http://localhost:3000,https://ablespace-frontend-4or3.onrender.com'
+  )
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
   app.enableCors({
-    origin: corsOrigin
-      .split(',')
-      .map((origin) => origin.trim()),
+    origin: corsOrigins,
     credentials: true,
-    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: [
+      'GET',
+      'POST',
+      'PATCH',
+      'DELETE',
+      'OPTIONS',
+    ],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+    ],
   });
 
   // URI versioning
@@ -98,7 +111,6 @@ async function bootstrap() {
       config,
     );
 
-    // Because global prefix is /api
     SwaggerModule.setup('api/docs', app, document);
 
     logger.log('Swagger docs available at /api/docs');
@@ -109,10 +121,10 @@ async function bootstrap() {
     ? Number(process.env.PORT)
     : 4000;
 
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 
   logger.log(
-    `API running on http://localhost:${port}/api/v1`,
+    `API running on port ${port} at /api/v1`,
   );
 
   logger.log(`Environment: ${nodeEnv}`);
